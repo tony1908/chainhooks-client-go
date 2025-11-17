@@ -1,3 +1,3 @@
-module github.com/toony1908/chainhooks-client-go
+module github.com/tony1908/chainhooks-client-go
 
 go 1.21
