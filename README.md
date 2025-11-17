@@ -17,7 +17,7 @@ A comprehensive Go client library for interacting with the [Hiro Chainhooks API]
 ## Installation
 
 ```bash
-go get github.com/hirosystems/chainhooks-client-go
+go get github.com/tony1908/chainhooks-client-go
 ```
 
 ## Quick Start
@@ -31,7 +31,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/hirosystems/chainhooks-client-go"
+	"github.com/tony1908/chainhooks-client-go"
 )
 
 func main() {
@@ -174,15 +174,22 @@ if err != nil {
 }
 
 for _, hook := range response.Chainhooks {
-	log.Printf("Hook: %s (Status: %s)", hook.UUID, hook.Status)
+	log.Printf("Hook: %s (Status: %s)", hook.UUID, hook.Status.Status)
 }
 ```
 
 #### Update Chainhook
 
+**Note:** Update requires a complete chainhook definition with all required fields (name, version, chain, network, filters, action).
+
 ```go
-updated := &chainhooks.ChainhookDefinition{
-	// ... updated definition
+updated, err := chainhooks.NewChainhookBuilder("updated-name", chainhooks.NetworkMainnet).
+	WithWebhookURL("https://example.com/webhook-updated").
+	AddSTXTransfer(nil, nil, nil).
+	Build()
+
+if err != nil {
+	log.Fatal(err)
 }
 
 hook, err := client.UpdateChainhook(context.Background(), "uuid-string", updated)
@@ -524,6 +531,46 @@ isServer := chainhooks.IsServerError(err)
 isClient := chainhooks.IsClientError(err)
 ```
 
+## Response Structure
+
+When you retrieve a chainhook, the API returns a nested structure:
+
+```go
+type Chainhook struct {
+	UUID       UUID                 `json:"uuid"`
+	Definition *ChainhookDefinition `json:"definition"`
+	Status     ChainhookStatusInfo  `json:"status"`
+}
+
+type ChainhookStatusInfo struct {
+	Status                    ChainhookStatus `json:"status"`
+	Enabled                   bool            `json:"enabled"`
+	CreatedAt                 int64           `json:"created_at"`
+	LastEvaluatedAt           *int64          `json:"last_evaluated_at"`
+	LastEvaluatedBlockHeight  *uint64         `json:"last_evaluated_block_height"`
+	LastOccurrenceAt          *int64          `json:"last_occurrence_at"`
+	LastOccurrenceBlockHeight *uint64         `json:"last_occurrence_block_height"`
+	EvaluatedBlockCount       uint64          `json:"evaluated_block_count"`
+	OccurrenceCount           uint64          `json:"occurrence_count"`
+}
+```
+
+Access fields like this:
+
+```go
+hook, err := client.GetChainhook(ctx, uuid)
+if err != nil {
+	log.Fatal(err)
+}
+
+log.Printf("Name: %s", hook.Definition.Name)
+log.Printf("Webhook URL: %s", hook.Definition.Action.URL)
+log.Printf("Status: %s", hook.Status.Status)
+log.Printf("Enabled: %v", hook.Status.Enabled)
+log.Printf("Created: %d", hook.Status.CreatedAt)
+log.Printf("Occurrence count: %d", hook.Status.OccurrenceCount)
+```
+
 ## Type Reference
 
 ### Networks
@@ -583,7 +630,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/hirosystems/chainhooks-client-go"
+	"github.com/tony1908/chainhooks-client-go"
 )
 
 func main() {
@@ -617,7 +664,7 @@ func main() {
 	}
 
 	log.Printf("Registered chainhook: %s", hook.UUID)
-	log.Printf("Status: %s, Enabled: %v", hook.Status, hook.Enabled)
+	log.Printf("Status: %s, Enabled: %v", hook.Status.Status, hook.Status.Enabled)
 
 	// List chainhooks
 	response, err := client.GetChainhooks(ctx, &chainhooks.PaginationOptions{
@@ -637,7 +684,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("Latest status: %s", hook.Status)
+	log.Printf("Latest status: %s", hook.Status.Status)
 
 	// Disable chainhook
 	err = client.EnableChainhook(ctx, hook.UUID, false)

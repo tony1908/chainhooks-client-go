@@ -123,8 +123,11 @@ func (c *Client) request(ctx context.Context, method, path string, body interfac
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
-	// Set headers
+	// Set headers (only set Content-Type if there's a body)
 	for key, value := range c.headers {
+		if key == HeaderContentType && body == nil {
+			continue // Skip Content-Type for requests with no body
+		}
 		req.Header.Set(key, value)
 	}
 

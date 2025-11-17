@@ -1,7 +1,5 @@
 package chainhooks
 
-import "time"
-
 // ============================================================================
 // Common Types
 // ============================================================================
@@ -300,25 +298,24 @@ type ChainhookDefinition struct {
 // Chainhook Response
 // ============================================================================
 
+// ChainhookStatusInfo represents the detailed status information of a chainhook.
+type ChainhookStatusInfo struct {
+	Status                    ChainhookStatus `json:"status"`
+	Enabled                   bool            `json:"enabled"`
+	CreatedAt                 int64           `json:"created_at"`
+	LastEvaluatedAt           *int64          `json:"last_evaluated_at"`
+	LastEvaluatedBlockHeight  *uint64         `json:"last_evaluated_block_height"`
+	LastOccurrenceAt          *int64          `json:"last_occurrence_at"`
+	LastOccurrenceBlockHeight *uint64         `json:"last_occurrence_block_height"`
+	EvaluatedBlockCount       uint64          `json:"evaluated_block_count"`
+	OccurrenceCount           uint64          `json:"occurrence_count"`
+}
+
 // Chainhook represents a registered chainhook with its metadata.
 type Chainhook struct {
-	UUID                      UUID              `json:"uuid"`
-	Name                      string            `json:"name"`
-	Version                   string            `json:"version"`
-	Chain                     Chain             `json:"chain"`
-	Network                   Network           `json:"network"`
-	Enabled                   bool              `json:"enabled"`
-	Status                    ChainhookStatus   `json:"status"`
-	Filters                   ChainhookFilters  `json:"filters"`
-	Options                   *ChainhookOptions `json:"options,omitempty"`
-	Action                    ChainhookAction   `json:"action"`
-	CreatedAt                 time.Time         `json:"created_at"`
-	LastEvaluatedAt           *time.Time        `json:"last_evaluated_at,omitempty"`
-	LastEvaluatedBlockHeight  *uint64           `json:"last_evaluated_block_height,omitempty"`
-	LastOccurrenceAt          *time.Time        `json:"last_occurrence_at,omitempty"`
-	LastOccurrenceBlockHeight *uint64           `json:"last_occurrence_block_height,omitempty"`
-	EvaluatedBlockCount       uint64            `json:"evaluated_block_count"`
-	OccurrenceCount           uint64            `json:"occurrence_count"`
+	UUID       UUID                 `json:"uuid"`
+	Definition *ChainhookDefinition `json:"definition"`
+	Status     ChainhookStatusInfo  `json:"status"`
 }
 
 // ============================================================================

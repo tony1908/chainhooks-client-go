@@ -2,7 +2,6 @@ package chainhooks
 
 import (
 	"context"
-	"testing"
 )
 
 // ExampleNewClient demonstrates basic client creation.
@@ -34,7 +33,7 @@ func ExampleNewChainhookBuilder() {
 }
 
 // ExampleClient_RegisterChainhook demonstrates registering a chainhook.
-func ExampleClient_RegisterChainhook(t *testing.T) {
+func ExampleClient_RegisterChainhook() {
 	client := NewClient(ChainhooksBaseURLs[NetworkMainnet])
 	client.SetAPIKey("test-api-key")
 
